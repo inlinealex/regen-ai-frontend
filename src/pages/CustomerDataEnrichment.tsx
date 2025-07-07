@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ClientSelector from '../components/ClientSelector';
 
 interface EnrichmentData {
   id: string;
@@ -33,6 +34,7 @@ interface CRMField {
 
 const CustomerDataEnrichment: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [enrichmentData, setEnrichmentData] = useState<EnrichmentData[]>([]);
   const [crmIntegrations, setCrmIntegrations] = useState<CRMIntegration[]>([]);
   const [selectedEnrichment, setSelectedEnrichment] = useState<EnrichmentData | null>(null);
@@ -153,6 +155,13 @@ const CustomerDataEnrichment: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Client Selection */}
+        <ClientSelector
+          selectedClientId={selectedClientId}
+          onClientSelect={setSelectedClientId}
+          className="mb-6"
+        />
+        
         <div className="bg-white rounded-lg shadow-lg">
           {/* Header */}
           <div className="border-b border-gray-200 p-6">

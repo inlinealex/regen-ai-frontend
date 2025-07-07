@@ -16,6 +16,7 @@ const sidebarItems = [
   { icon: '📥', label: 'Data Ingestion', path: '/data-ingestion' },
   { icon: '🔍', label: 'Customer Enrichment', path: '/customer-enrichment' },
   { icon: '📈', label: 'Customer Analytics', path: '/customer-analytics' },
+  { icon: '👥', label: 'Client Management', path: '/client-management' },
   { icon: '🎓', label: 'Advanced Training', path: '/advanced-training' },
   { icon: '🔄', label: 'Sales Training', path: '/sales-training' },
   { icon: '⚙️', label: 'Settings', path: '/database-config' },

@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import ClientSelector from '../components/ClientSelector';
 
 interface LeadData {
   id: string;
@@ -49,6 +50,7 @@ interface FieldMapping {
 
 const DataIngestionDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('import');
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [importJobs, setImportJobs] = useState<ImportJob[]>([]);
   const [leads, setLeads] = useState<LeadData[]>([]);
   const [enrichmentResults, setEnrichmentResults] = useState<EnrichmentResult[]>([]);
@@ -373,6 +375,13 @@ const DataIngestionDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Client Selection */}
+        <ClientSelector
+          selectedClientId={selectedClientId}
+          onClientSelect={setSelectedClientId}
+          className="mb-6"
+        />
+        
         <div className="bg-white rounded-lg shadow-lg">
           {/* Header */}
           <div className="border-b border-gray-200 p-6">

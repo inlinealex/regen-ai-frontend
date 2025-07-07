@@ -23,6 +23,7 @@ import LiveDataDashboard from './pages/LiveDataDashboard';
 import AdvancedAISafetySystem from './pages/AdvancedAISafetySystem';
 import ManualTrainingInterface from './pages/ManualTrainingInterface';
 import StaffDashboard from './pages/StaffDashboard';
+import ClientManagement from './pages/ClientManagement';
 import './styles/App.css';
 
 const App: React.FC = () => {
@@ -52,6 +53,7 @@ const App: React.FC = () => {
           <Route path="/advanced-ai-safety" element={<AdvancedAISafetySystem />} />
           <Route path="/manual-training" element={<ManualTrainingInterface />} />
           <Route path="/staff-dashboard" element={<StaffDashboard />} />
+          <Route path="/client-management" element={<ClientManagement />} />
         </Routes>
       </UberLayout>
     </Router>
