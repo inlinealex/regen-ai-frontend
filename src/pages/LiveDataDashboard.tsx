@@ -129,7 +129,7 @@ const LiveDataDashboard: React.FC = () => {
       active: 'text-green-600',
       paused: 'text-yellow-600',
       draft: 'text-gray-600',
-      completed: 'text-blue-600',
+      completed: 'text-blue-600 dark:text-green-400',
       testing: 'text-purple-600'
     };
     return colors[status as keyof typeof colors] || 'text-gray-600';
@@ -159,7 +159,7 @@ const LiveDataDashboard: React.FC = () => {
         <div className="mb-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Live Data Dashboard</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Live Data Dashboard</h1>
               <p className="mt-2 text-gray-600">Real-time campaign performance and lead activity</p>
             </div>
             <div className="flex items-center space-x-4">
@@ -181,7 +181,7 @@ const LiveDataDashboard: React.FC = () => {
                   type="checkbox"
                   checked={autoRefresh}
                   onChange={(e) => setAutoRefresh(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-600 dark:text-green-400 focus:ring-blue-500 dark:focus:ring-green-500 border-gray-300 rounded"
                 />
                 <span className="text-sm text-gray-700">Auto-refresh</span>
               </div>
@@ -202,14 +202,14 @@ const LiveDataDashboard: React.FC = () => {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-blue-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Total Leads</p>
-                <p className="text-2xl font-bold text-gray-900">{overallMetrics.totalLeads}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{overallMetrics.totalLeads}</p>
               </div>
             </div>
           </div>
@@ -225,7 +225,7 @@ const LiveDataDashboard: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Meetings Booked</p>
-                <p className="text-2xl font-bold text-gray-900">{overallMetrics.meetingsBooked}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{overallMetrics.meetingsBooked}</p>
               </div>
             </div>
           </div>
@@ -241,7 +241,7 @@ const LiveDataDashboard: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Revenue</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(overallMetrics.revenue)}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(overallMetrics.revenue)}</p>
               </div>
             </div>
           </div>
@@ -269,7 +269,7 @@ const LiveDataDashboard: React.FC = () => {
           {/* Campaign Performance */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Campaign Performance</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Campaign Performance</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -315,7 +315,7 @@ const LiveDataDashboard: React.FC = () => {
           {/* Recent Lead Activity */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Recent Lead Activity</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Lead Activity</h2>
             </div>
             <div className="overflow-y-auto max-h-96">
               <div className="divide-y divide-gray-200">
@@ -363,7 +363,7 @@ const LiveDataDashboard: React.FC = () => {
         {/* Performance Metrics */}
         <div className="mt-8 bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Performance Metrics</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Performance Metrics</h2>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -1,695 +1,553 @@
 import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
+import { Input } from '../components/ui/Input';
+import { Label } from '../components/ui/Label';
+import { Textarea } from '../components/ui/Textarea';
+import { Switch } from '../components/ui/Switch';
+import { Progress } from '../components/ui/Progress';
+import { Alert, AlertDescription } from '../components/ui/Alert';
+import { api } from '../services/api';
 
 interface Persona {
   id: string;
   name: string;
+  type: string;
   description: string;
-  type: 'base' | 'custom' | 'specialized';
-  instructions: string;
-  trainingData: {
-    positiveExamples: string[];
-    negativeExamples: string[];
-    conversationPatterns: string[];
+  voice: string;
+  specialization: string;
+  qualification_criteria: {
+    budget: string;
+    authority: string;
+    need: string;
+    timeline: string;
+    sentiment_threshold?: number;
   };
-  performance: {
-    accuracy: number;
-    responseRate: number;
-    conversionRate: number;
-    lastTrained: string;
+  outreach_style: string;
+  ai_prompts: {
+    initial_outreach: string;
+    follow_up: string;
+    objection_handling: string;
+    qualification_questions: string;
   };
-  settings: {
-    manualMode: boolean;
-    autoLearning: boolean;
-    safetyChecks: boolean;
-    hallucinationPrevention: boolean;
-    jailbreakPrevention: boolean;
+  success_metrics: {
+    primary: string;
+    secondary: string[];
+    targets: {
+      [key: string]: number;
+    };
   };
 }
 
-interface TrainingSession {
+interface TrainingExample {
   id: string;
   personaId: string;
-  leadId: string;
-  conversationHistory: Array<{
-    id: string;
-    role: 'user' | 'assistant';
-    content: string;
-    timestamp: string;
-    persona?: string;
-    manuallySwitched?: boolean;
-    switchReason?: string;
-  }>;
-  manualSwitches: Array<{
-    fromPersona: string;
-    toPersona: string;
-    reason: string;
-    timestamp: string;
-  }>;
-  performance: {
-    totalMessages: number;
-    manualSwitches: number;
-    userSatisfaction: number;
-    conversionAchieved: boolean;
-  };
-  status: 'active' | 'completed' | 'reviewed';
-  startTime: string;
-  endTime?: string;
+  input: string;
+  expectedOutput: string;
+  isPositive: boolean;
+  context: string;
+  industry: string;
+  companySize: string;
 }
 
-interface BaseData {
-  id: string;
-  name: string;
-  category: 'industry' | 'company_size' | 'lead_stage' | 'objection_type';
-  data: string[];
-  description: string;
-}
-
-const EnhancedPersonaTraining: React.FC = () => {
+export default function EnhancedPersonaTraining() {
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null);
-  const [trainingSessions, setTrainingSessions] = useState<TrainingSession[]>([]);
-  const [activeSession, setActiveSession] = useState<TrainingSession | null>(null);
-  const [baseData, setBaseData] = useState<BaseData[]>([]);
-  const [viewMode, setViewMode] = useState<'overview' | 'training' | 'testing' | 'analytics' | 'settings' | 'base-data'>('overview');
-  const [loading, setLoading] = useState(false);
-  const [userInput, setUserInput] = useState('');
-  const [showCreatePersona, setShowCreatePersona] = useState(false);
-  const [showBaseDataEditor, setShowBaseDataEditor] = useState(false);
+  const [trainingExamples, setTrainingExamples] = useState<TrainingExample[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [trainingProgress, setTrainingProgress] = useState(0);
+  const [isTraining, setIsTraining] = useState(false);
 
-  const API_BASE = 'http://localhost:3000/api';
+  // Form state for new training example
+  const [newExample, setNewExample] = useState({
+    input: '',
+    expectedOutput: '',
+    isPositive: true,
+    context: '',
+    industry: '',
+    companySize: ''
+  });
 
   useEffect(() => {
     loadPersonas();
-    loadTrainingSessions();
-    loadBaseData();
   }, []);
 
   const loadPersonas = async () => {
-    setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/personas`);
-      const data = await response.json();
-      if (data.success) {
-        setPersonas(data.personas);
+      setLoading(true);
+      const response = await api.get('/enhanced-campaigns/personas');
+      setPersonas(response.data.data || []);
+      
+      if (response.data.data && response.data.data.length > 0) {
+        setSelectedPersona(response.data.data[0]);
       }
     } catch (error) {
-      console.error('Failed to load personas:', error);
+      console.error('Error loading personas:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadTrainingSessions = async () => {
+  const loadTrainingExamples = async (personaId: string) => {
     try {
-      const response = await fetch(`${API_BASE}/training/sessions`);
-      const data = await response.json();
-      if (data.success) {
-        setTrainingSessions(data.sessions);
-      }
-    } catch (error) {
-      console.error('Failed to load training sessions:', error);
-    }
-  };
-
-  const loadBaseData = async () => {
-    try {
-      const response = await fetch(`${API_BASE}/base-data`);
-      const data = await response.json();
-      if (data.success) {
-        setBaseData(data.baseData);
-      }
-    } catch (error) {
-      console.error('Failed to load base data:', error);
-    }
-  };
-
-  const createNewSession = async (personaId: string) => {
-    try {
-      const response = await fetch(`${API_BASE}/training/sessions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      // Mock training examples for demonstration
+      const examples: TrainingExample[] = [
+        {
+          id: 'ex-1',
           personaId,
-          leadId: `training-lead-${Date.now()}`,
-          manualMode: true
-        })
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        const newSession: TrainingSession = {
-          id: data.sessionId,
+          input: 'Tech company looking to hire senior developers',
+          expectedOutput: 'I can help you optimize your hiring process for senior developers. What specific challenges are you facing with recruitment?',
+          isPositive: true,
+          context: 'Job analysis for tech hiring',
+          industry: 'Technology',
+          companySize: '51-200'
+        },
+        {
+          id: 'ex-2',
           personaId,
-          leadId: data.leadId,
-          conversationHistory: [],
-          manualSwitches: [],
-          performance: {
-            totalMessages: 0,
-            manualSwitches: 0,
-            userSatisfaction: 0,
-            conversionAchieved: false
-          },
-          status: 'active',
-          startTime: new Date().toISOString()
-        };
-
-        setTrainingSessions([...trainingSessions, newSession]);
-        setActiveSession(newSession);
-      }
+          input: 'Customer satisfaction has been declining',
+          expectedOutput: 'I can analyze your customer sentiment patterns and identify improvement opportunities. How do you currently collect feedback?',
+          isPositive: true,
+          context: 'Sentiment analysis for customer experience',
+          industry: 'Retail',
+          companySize: '201-1000'
+        }
+      ];
+      setTrainingExamples(examples);
     } catch (error) {
-      console.error('Failed to create training session:', error);
+      console.error('Error loading training examples:', error);
     }
   };
 
-  const sendMessage = async (message: string) => {
-    if (!activeSession || !message.trim()) return;
+  useEffect(() => {
+    if (selectedPersona) {
+      loadTrainingExamples(selectedPersona.id);
+    }
+  }, [selectedPersona]);
 
-    const userMessage = {
-      id: Date.now().toString(),
-      role: 'user' as const,
-      content: message,
-      timestamp: new Date().toISOString()
-    };
-
-    const updatedSession = {
-      ...activeSession,
-      conversationHistory: [...activeSession.conversationHistory, userMessage]
-    };
-
-    setActiveSession(updatedSession);
-    setUserInput('');
-
-    // Generate AI response
+  const startTraining = async () => {
+    if (!selectedPersona) return;
+    
     try {
-      const response = await fetch(`${API_BASE}/training/process-message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId: activeSession.id,
-          message,
-          manualMode: selectedPersona?.settings.manualMode || true,
-          currentPersona: activeSession.personaId
-        })
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        const aiMessage = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant' as const,
-          content: data.response,
-          timestamp: new Date().toISOString(),
-          persona: data.persona
-        };
-
-        const finalSession = {
-          ...updatedSession,
-          conversationHistory: [...updatedSession.conversationHistory, aiMessage]
-        };
-
-        setActiveSession(finalSession);
-        updateSession(finalSession);
-      }
+      setIsTraining(true);
+      setTrainingProgress(0);
+      
+      // Simulate training progress
+      const interval = setInterval(() => {
+        setTrainingProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setIsTraining(false);
+            return 100;
+          }
+          return prev + 10;
+        });
+      }, 500);
+      
     } catch (error) {
-      console.error('Failed to process message:', error);
+      console.error('Error starting training:', error);
+      setIsTraining(false);
     }
   };
 
-  const manuallySwitchPersona = async (newPersonaId: string, reason: string) => {
-    if (!activeSession) return;
-
-    const switchRecord = {
-      fromPersona: activeSession.personaId,
-      toPersona: newPersonaId,
-      reason,
-      timestamp: new Date().toISOString()
-    };
-
-    const updatedSession = {
-      ...activeSession,
-      personaId: newPersonaId,
-      manualSwitches: [...activeSession.manualSwitches, switchRecord]
-    };
-
-    setActiveSession(updatedSession);
-
-    // Record the manual switch for learning
+  const addTrainingExample = async () => {
+    if (!selectedPersona || !newExample.input || !newExample.expectedOutput) return;
+    
     try {
-      await fetch(`${API_BASE}/training/record-manual-switch`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId: activeSession.id,
-          fromPersona: activeSession.personaId,
-          toPersona: newPersonaId,
-          reason,
-          conversationContext: activeSession.conversationHistory.slice(-3)
-        })
+      const example: TrainingExample = {
+        id: `ex-${Date.now()}`,
+        personaId: selectedPersona.id,
+        input: newExample.input,
+        expectedOutput: newExample.expectedOutput,
+        isPositive: newExample.isPositive,
+        context: newExample.context,
+        industry: newExample.industry,
+        companySize: newExample.companySize
+      };
+      
+      setTrainingExamples([...trainingExamples, example]);
+      setNewExample({
+        input: '',
+        expectedOutput: '',
+        isPositive: true,
+        context: '',
+        industry: '',
+        companySize: ''
       });
     } catch (error) {
-      console.error('Failed to record manual switch:', error);
-    }
-
-    updateSession(updatedSession);
-  };
-
-  const updateSession = (session: TrainingSession) => {
-    setTrainingSessions(trainingSessions.map(s => s.id === session.id ? session : s));
-  };
-
-  const updatePersonaSettings = async (personaId: string, settings: Partial<Persona['settings']>) => {
-    try {
-      const response = await fetch(`${API_BASE}/personas/${personaId}/settings`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
-      });
-
-      if (response.ok) {
-        setPersonas(personas.map(p => 
-          p.id === personaId ? { ...p, settings: { ...p.settings, ...settings } } : p
-        ));
-      }
-    } catch (error) {
-      console.error('Failed to update persona settings:', error);
+      console.error('Error adding training example:', error);
     }
   };
 
-  const getPerformanceColor = (rate: number) => {
-    if (rate >= 80) return 'text-green-600';
-    if (rate >= 60) return 'text-yellow-600';
-    return 'text-red-600';
+  const getPersonaTypeColor = (type: string) => {
+    const colors: { [key: string]: string } = {
+      'job-analysis': 'bg-blue-100 text-blue-800',
+      'sentiment-analysis': 'bg-green-100 text-green-800',
+      're-engagement': 'bg-yellow-100 text-yellow-800',
+      'marketing-traction': 'bg-purple-100 text-purple-800',
+      'vendor-outreach': 'bg-orange-100 text-orange-800',
+      'supplier-outreach': 'bg-red-100 text-red-800',
+      'initial-contact': 'bg-gray-100 text-gray-800',
+      'crm-service-desk': 'bg-indigo-100 text-indigo-800'
+    };
+    return colors[type] || 'bg-gray-100 text-gray-800';
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg">Loading personas...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Enhanced Persona Training</h1>
-          <p className="mt-2 text-gray-600">Train personas with manual mode controls and base data management</p>
-        </div>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Enhanced Persona Training</h1>
+        <Button onClick={startTraining} disabled={isTraining || !selectedPersona}>
+          {isTraining ? 'Training...' : 'Start Training'}
+        </Button>
+      </div>
 
-        {/* Navigation Tabs */}
-        <div className="mb-8">
-          <nav className="flex space-x-8">
-            {[
-              { id: 'overview', name: 'Overview' },
-              { id: 'training', name: 'Training' },
-              { id: 'testing', name: 'Testing' },
-              { id: 'analytics', name: 'Analytics' },
-              { id: 'settings', name: 'Settings' },
-              { id: 'base-data', name: 'Base Data' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setViewMode(tab.id as any)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  viewMode === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {tab.name}
-              </button>
-            ))}
-          </nav>
-        </div>
+      {isTraining && (
+        <Alert>
+          <AlertDescription>
+            Training in progress... {trainingProgress}% complete
+            <Progress value={trainingProgress} className="mt-2" />
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {/* Overview Tab */}
-        {viewMode === 'overview' && (
-          <div className="space-y-8">
-            {/* Persona Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {personas.map((persona) => (
-                <div key={persona.id} className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">{persona.name}</h3>
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      persona.type === 'base' ? 'bg-blue-100 text-blue-800' :
-                      persona.type === 'custom' ? 'bg-green-100 text-green-800' :
-                      'bg-purple-100 text-purple-800'
-                    }`}>
-                      {persona.type}
-                    </span>
-                  </div>
-                  
-                  <p className="text-sm text-gray-600 mb-4">{persona.description}</p>
-                  
-                  {/* Performance Metrics */}
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p className="text-xs text-gray-500">Accuracy</p>
-                      <p className={`text-sm font-medium ${getPerformanceColor(persona.performance.accuracy)}`}>
-                        {persona.performance.accuracy}%
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Response Rate</p>
-                      <p className={`text-sm font-medium ${getPerformanceColor(persona.performance.responseRate)}`}>
-                        {persona.performance.responseRate}%
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Conversion Rate</p>
-                      <p className={`text-sm font-medium ${getPerformanceColor(persona.performance.conversionRate)}`}>
-                        {persona.performance.conversionRate}%
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Last Trained</p>
-                      <p className="text-sm font-medium text-gray-900">
-                        {new Date(persona.performance.lastTrained).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="personas">Personas</TabsTrigger>
+          <TabsTrigger value="training">Training</TabsTrigger>
+          <TabsTrigger value="examples">Examples</TabsTrigger>
+        </TabsList>
 
-                  {/* Settings Status */}
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-500">Manual Mode</span>
-                      <span className={persona.settings.manualMode ? 'text-green-600' : 'text-red-600'}>
-                        {persona.settings.manualMode ? 'Enabled' : 'Disabled'}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-500">Auto Learning</span>
-                      <span className={persona.settings.autoLearning ? 'text-green-600' : 'text-red-600'}>
-                        {persona.settings.autoLearning ? 'Enabled' : 'Disabled'}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-500">Safety Checks</span>
-                      <span className={persona.settings.safetyChecks ? 'text-green-600' : 'text-red-600'}>
-                        {persona.settings.safetyChecks ? 'Enabled' : 'Disabled'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => {
-                        setSelectedPersona(persona);
-                        setViewMode('training');
-                      }}
-                      className="flex-1 px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-                    >
-                      Train
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedPersona(persona);
-                        setViewMode('settings');
-                      }}
-                      className="flex-1 px-3 py-2 bg-gray-600 text-white rounded text-sm hover:bg-gray-700"
-                    >
-                      Settings
-                    </button>
-                  </div>
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Total Personas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{personas.length}</div>
+                <div className="text-sm text-gray-500">
+                  {personas.filter(p => p.type === 'job-analysis').length} job analysis
                 </div>
-              ))}
-            </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Training Examples</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{trainingExamples.length}</div>
+                <div className="text-sm text-gray-500">
+                  {trainingExamples.filter(ex => ex.isPositive).length} positive examples
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Active Training</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{isTraining ? '1' : '0'}</div>
+                <div className="text-sm text-gray-500">
+                  {isTraining ? 'Training in progress' : 'No active training'}
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        )}
 
-        {/* Training Tab */}
-        {viewMode === 'training' && selectedPersona && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Persona Settings Panel */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Training Settings</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Manual Mode</label>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedPersona.settings.manualMode}
-                      onChange={(e) => updatePersonaSettings(selectedPersona.id, { manualMode: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <span className="ml-2 text-sm text-gray-900">
-                      {selectedPersona.settings.manualMode ? 'Enabled' : 'Disabled'}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Auto Learning</label>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedPersona.settings.autoLearning}
-                      onChange={(e) => updatePersonaSettings(selectedPersona.id, { autoLearning: e.target.checked })}
-                      className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                    />
-                    <span className="ml-2 text-sm text-gray-900">
-                      {selectedPersona.settings.autoLearning ? 'Enabled' : 'Disabled'}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Safety Checks</label>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedPersona.settings.safetyChecks}
-                      onChange={(e) => updatePersonaSettings(selectedPersona.id, { safetyChecks: e.target.checked })}
-                      className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded"
-                    />
-                    <span className="ml-2 text-sm text-gray-900">
-                      {selectedPersona.settings.safetyChecks ? 'Enabled' : 'Disabled'}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Hallucination Prevention</label>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedPersona.settings.hallucinationPrevention}
-                      onChange={(e) => updatePersonaSettings(selectedPersona.id, { hallucinationPrevention: e.target.checked })}
-                      className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-                    />
-                    <span className="ml-2 text-sm text-gray-900">
-                      {selectedPersona.settings.hallucinationPrevention ? 'Enabled' : 'Disabled'}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Jailbreak Prevention</label>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedPersona.settings.jailbreakPrevention}
-                      onChange={(e) => updatePersonaSettings(selectedPersona.id, { jailbreakPrevention: e.target.checked })}
-                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                    />
-                    <span className="ml-2 text-sm text-gray-900">
-                      {selectedPersona.settings.jailbreakPrevention ? 'Enabled' : 'Disabled'}
-                    </span>
-                  </div>
-                </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Persona Types Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {Array.from(new Set(personas.map(p => p.type))).map((type) => {
+                  const count = personas.filter(p => p.type === type).length;
+                  return (
+                    <div key={type} className="text-center p-4 border rounded-lg">
+                      <Badge className={getPersonaTypeColor(type)}>
+                        {type.replace('-', ' ')}
+                      </Badge>
+                      <div className="text-2xl font-bold mt-2">{count}</div>
+                      <div className="text-sm text-gray-500">personas</div>
+                    </div>
+                  );
+                })}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-              <div className="mt-6">
-                <button
-                  onClick={() => createNewSession(selectedPersona.id)}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Start Training Session
-                </button>
-              </div>
-            </div>
-
-            {/* Conversation Panel */}
-            <div className="lg:col-span-2 bg-white rounded-lg shadow">
-              <div className="p-6 border-b">
-                <h2 className="text-lg font-semibold text-gray-900">Training Conversation</h2>
-                {activeSession && (
-                  <p className="text-sm text-gray-600 mt-1">
-                    Session: {activeSession.id} | Messages: {activeSession.conversationHistory.length}
-                  </p>
-                )}
-              </div>
-
-              {/* Conversation Messages */}
-              <div className="h-96 overflow-y-auto p-6">
-                {activeSession ? (
-                  <div className="space-y-4">
-                    {activeSession.conversationHistory.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                            message.role === 'user'
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-gray-100 text-gray-900'
-                          }`}
-                        >
-                          <div className="text-sm">{message.content}</div>
-                          <div className="text-xs opacity-75 mt-1">
-                            {new Date(message.timestamp).toLocaleTimeString()}
-                            {message.persona && (
-                              <span className="ml-2 px-2 py-1 bg-gray-200 rounded">
-                                {personas.find(p => p.id === message.persona)?.name}
-                              </span>
-                            )}
-                            {message.manuallySwitched && (
-                              <span className="ml-2 px-2 py-1 bg-yellow-200 text-yellow-800 rounded">
-                                Manual
-                              </span>
-                            )}
-                          </div>
+        <TabsContent value="personas" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Personas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {personas.map((persona) => (
+                  <Card key={persona.id} className="cursor-pointer hover:shadow-lg transition-shadow"
+                        onClick={() => setSelectedPersona(persona)}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">{persona.name}</CardTitle>
+                        <Badge className={getPersonaTypeColor(persona.type)}>
+                          {persona.type.replace('-', ' ')}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-3">{persona.description}</p>
+                      <div className="space-y-2">
+                        <div>
+                          <Label className="text-xs">Voice</Label>
+                          <p className="text-sm">{persona.voice}</p>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Specialization</Label>
+                          <p className="text-sm">{persona.specialization}</p>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Primary Metric</Label>
+                          <p className="text-sm font-medium">{persona.success_metrics.primary}</p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center text-gray-500">
-                    <p>No active training session</p>
-                    <p className="text-sm mt-2">Start a session to begin training</p>
-                  </div>
-                )}
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-              {/* Message Input */}
-              {activeSession && (
-                <div className="p-6 border-t">
-                  <div className="flex space-x-2">
-                    <input
-                      type="text"
-                      value={userInput}
-                      onChange={(e) => setUserInput(e.target.value)}
-                      placeholder="Type your message..."
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          sendMessage(userInput);
-                        }
-                      }}
-                    />
-                    <button
-                      onClick={() => sendMessage(userInput)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                    >
-                      Send
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Settings Tab */}
-        {viewMode === 'settings' && selectedPersona && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Persona Settings</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Instructions Editor */}
-              <div>
-                <h3 className="text-md font-medium text-gray-900 mb-4">Instructions</h3>
-                <textarea
-                  value={selectedPersona.instructions}
-                  onChange={(e) => {
-                    // Update instructions logic here
-                  }}
-                  rows={10}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter persona instructions..."
-                />
-              </div>
-
-              {/* Training Data */}
-              <div>
-                <h3 className="text-md font-medium text-gray-900 mb-4">Training Data</h3>
-                <div className="space-y-4">
+        <TabsContent value="training" className="space-y-6">
+          {selectedPersona && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Training: {selectedPersona.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Positive Examples</label>
-                    <textarea
-                      value={selectedPersona.trainingData.positiveExamples.join('\n')}
-                      rows={4}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter positive examples..."
-                    />
+                    <Label>Persona Type</Label>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <Badge className={getPersonaTypeColor(selectedPersona.type)}>
+                        {selectedPersona.type.replace('-', ' ')}
+                      </Badge>
+                      <span className="text-sm text-gray-600">{selectedPersona.specialization}</span>
+                    </div>
                   </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label>Voice & Style</Label>
+                      <p className="text-sm mt-1">{selectedPersona.voice}</p>
+                      <p className="text-sm text-gray-600 mt-1">{selectedPersona.outreach_style}</p>
+                    </div>
+
+                    <div>
+                      <Label>Qualification Criteria</Label>
+                      <div className="space-y-1 mt-1">
+                        <div className="text-sm"><strong>Budget:</strong> {selectedPersona.qualification_criteria.budget}</div>
+                        <div className="text-sm"><strong>Authority:</strong> {selectedPersona.qualification_criteria.authority}</div>
+                        <div className="text-sm"><strong>Need:</strong> {selectedPersona.qualification_criteria.need}</div>
+                        <div className="text-sm"><strong>Timeline:</strong> {selectedPersona.qualification_criteria.timeline}</div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Negative Examples</label>
-                    <textarea
-                      value={selectedPersona.trainingData.negativeExamples.join('\n')}
-                      rows={4}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter negative examples..."
-                    />
+                    <Label>AI Prompts</Label>
+                    <div className="space-y-3 mt-2">
+                      <div>
+                        <Label className="text-xs">Initial Outreach</Label>
+                        <Textarea 
+                          value={selectedPersona.ai_prompts.initial_outreach}
+                          readOnly
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Follow-up</Label>
+                        <Textarea 
+                          value={selectedPersona.ai_prompts.follow_up}
+                          readOnly
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Objection Handling</Label>
+                        <Textarea 
+                          value={selectedPersona.ai_prompts.objection_handling}
+                          readOnly
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Qualification Questions</Label>
+                        <Textarea 
+                          value={selectedPersona.ai_prompts.qualification_questions}
+                          readOnly
+                          className="mt-1"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* Base Data Tab */}
-        {viewMode === 'base-data' && (
-          <div className="space-y-8">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-900">Base Data Management</h2>
-              <button
-                onClick={() => setShowBaseDataEditor(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Add Base Data
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {baseData.map((data) => (
-                <div key={data.id} className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">{data.name}</h3>
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      data.category === 'industry' ? 'bg-blue-100 text-blue-800' :
-                      data.category === 'company_size' ? 'bg-green-100 text-green-800' :
-                      data.category === 'lead_stage' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-purple-100 text-purple-800'
-                    }`}>
-                      {data.category}
-                    </span>
-                  </div>
-                  
-                  <p className="text-sm text-gray-600 mb-4">{data.description}</p>
-                  
-                  <div className="space-y-2">
-                    <p className="text-xs text-gray-500">Data Items: {data.data.length}</p>
-                    <div className="max-h-32 overflow-y-auto">
-                      {data.data.slice(0, 5).map((item, index) => (
-                        <div key={index} className="text-xs text-gray-700 bg-gray-50 px-2 py-1 rounded">
-                          {item}
+                  <div>
+                    <Label>Success Metrics</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                      <div>
+                        <Label className="text-xs">Primary Metric</Label>
+                        <div className="font-medium">{selectedPersona.success_metrics.primary}</div>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Target</Label>
+                        <div className="font-medium">
+                          {(selectedPersona.success_metrics.targets[selectedPersona.success_metrics.primary] * 100).toFixed(1)}%
                         </div>
-                      ))}
-                      {data.data.length > 5 && (
-                        <div className="text-xs text-gray-500">
-                          +{data.data.length - 5} more items
+                      </div>
+                      <div>
+                        <Label className="text-xs">Secondary Metrics</Label>
+                        <div className="text-sm">
+                          {selectedPersona.success_metrics.secondary.join(', ')}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="examples" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Training Examples</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label>Input Context</Label>
+                    <Input
+                      value={newExample.input}
+                      onChange={(e) => setNewExample({...newExample, input: e.target.value})}
+                      placeholder="Enter input context"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Expected Output</Label>
+                    <Textarea
+                      value={newExample.expectedOutput}
+                      onChange={(e) => setNewExample({...newExample, expectedOutput: e.target.value})}
+                      placeholder="Enter expected output"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Industry</Label>
+                    <Input
+                      value={newExample.industry}
+                      onChange={(e) => setNewExample({...newExample, industry: e.target.value})}
+                      placeholder="Enter industry"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Company Size</Label>
+                    <Select value={newExample.companySize} onValueChange={(value) => setNewExample({...newExample, companySize: value})}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select company size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1-50">1-50</SelectItem>
+                        <SelectItem value="51-200">51-200</SelectItem>
+                        <SelectItem value="201-1000">201-1000</SelectItem>
+                        <SelectItem value="1000+">1000+</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Context</Label>
+                    <Input
+                      value={newExample.context}
+                      onChange={(e) => setNewExample({...newExample, context: e.target.value})}
+                      placeholder="Enter context"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={newExample.isPositive}
+                      onCheckedChange={(checked) => setNewExample({...newExample, isPositive: checked})}
+                    />
+                    <Label>Positive Example</Label>
+                  </div>
+                </div>
+
+                <Button onClick={addTrainingExample} disabled={!newExample.input || !newExample.expectedOutput}>
+                  Add Training Example
+                </Button>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Current Examples</h3>
+                  {trainingExamples.map((example) => (
+                    <div key={example.id} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant={example.isPositive ? "default" : "secondary"}>
+                          {example.isPositive ? "Positive" : "Negative"}
+                        </Badge>
+                        <div className="text-sm text-gray-500">
+                          {example.industry} • {example.companySize}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div>
+                          <Label className="text-xs">Input</Label>
+                          <p className="text-sm">{example.input}</p>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Expected Output</Label>
+                          <p className="text-sm">{example.expectedOutput}</p>
+                        </div>
+                        {example.context && (
+                          <div>
+                            <Label className="text-xs">Context</Label>
+                            <p className="text-sm">{example.context}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-};
-
-export default EnhancedPersonaTraining; 
+} 

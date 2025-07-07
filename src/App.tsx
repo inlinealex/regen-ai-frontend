@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import UberLayout from './layouts/UberLayout';
 import HomeDashboard from './pages/HomeDashboard';
 import PersonaTraining from './pages/PersonaTraining';
@@ -24,6 +24,10 @@ import AdvancedAISafetySystem from './pages/AdvancedAISafetySystem';
 import ManualTrainingInterface from './pages/ManualTrainingInterface';
 import StaffDashboard from './pages/StaffDashboard';
 import ClientManagement from './pages/ClientManagement';
+import EnhancedCampaignManagement from './pages/EnhancedCampaignManagement';
+import BillingManagement from './pages/BillingManagement';
+import WebScrapingManagement from './pages/WebScrapingManagement';
+import ROICalculator from './pages/ROICalculator';
 import './styles/App.css';
 
 const App: React.FC = () => {
@@ -32,7 +36,19 @@ const App: React.FC = () => {
       <UberLayout>
         <Routes>
           <Route path="/" element={<HomeDashboard />} />
-          <Route path="/persona-training" element={<PersonaTraining />} />
+          
+          {/* Enhanced Pages - Primary Interfaces */}
+          <Route path="/enhanced-campaign-management" element={<EnhancedCampaignManagement />} />
+          <Route path="/billing-management" element={<BillingManagement />} />
+          <Route path="/web-scraping-management" element={<WebScrapingManagement />} />
+          <Route path="/enhanced-persona-training" element={<EnhancedPersonaTraining />} />
+          <Route path="/roi-calculator" element={<ROICalculator />} />
+          
+          {/* Legacy Routes - Redirect to Enhanced Versions */}
+          <Route path="/campaign-management" element={<Navigate to="/enhanced-campaign-management" replace />} />
+          <Route path="/persona-training" element={<Navigate to="/enhanced-persona-training" replace />} />
+          
+          {/* Other Pages */}
           <Route path="/instruction-sets" element={<InstructionSetTraining />} />
           <Route path="/sales-training" element={<SalesTrainingFeedbackLoop />} />
           <Route path="/phone-numbers" element={<PhoneNumberManagement />} />
@@ -44,11 +60,9 @@ const App: React.FC = () => {
           <Route path="/advanced-training" element={<AdvancedPersonaTraining />} />
           <Route path="/ai-safety" element={<AISafetyMonitoringDashboard />} />
           <Route path="/lead-management" element={<LeadManagementDashboard />} />
-          <Route path="/campaign-management" element={<CampaignManagementInterface />} />
           <Route path="/customer-enrichment" element={<CustomerDataEnrichment />} />
           <Route path="/database-config" element={<DatabaseConfiguration />} />
           <Route path="/vector-database" element={<VectorDatabaseDashboard />} />
-          <Route path="/enhanced-persona-training" element={<EnhancedPersonaTraining />} />
           <Route path="/live-data" element={<LiveDataDashboard />} />
           <Route path="/advanced-ai-safety" element={<AdvancedAISafetySystem />} />
           <Route path="/manual-training" element={<ManualTrainingInterface />} />

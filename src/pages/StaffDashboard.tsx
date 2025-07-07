@@ -150,7 +150,7 @@ const StaffDashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Staff Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Staff Dashboard</h1>
           <p className="mt-2 text-gray-600">AI Safety & Training Management</p>
         </div>
 
@@ -182,7 +182,7 @@ const StaffDashboard: React.FC = () => {
         {activeTab === 'dashboard' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-medium text-gray-900">Safety Status</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Safety Status</h3>
               <div className="mt-4 space-y-2">
                 {safetyConfig && Object.entries(safetyConfig).map(([key, value]) => (
                   <div key={key} className="flex items-center justify-between">
@@ -200,7 +200,7 @@ const StaffDashboard: React.FC = () => {
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-medium text-gray-900">Approval Queue</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Approval Queue</h3>
               <div className="mt-4">
                 <p className="text-3xl font-bold text-blue-600">{approvalQueue.length}</p>
                 <p className="text-sm text-gray-600">Pending approvals</p>
@@ -208,7 +208,7 @@ const StaffDashboard: React.FC = () => {
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-medium text-gray-900">Training Data</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Training Data</h3>
               <div className="mt-4">
                 <p className="text-3xl font-bold text-green-600">{trainingData.length}</p>
                 <p className="text-sm text-gray-600">Total examples</p>
@@ -216,7 +216,7 @@ const StaffDashboard: React.FC = () => {
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-medium text-gray-900">Quick Actions</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Quick Actions</h3>
               <div className="mt-4 space-y-2">
                 <button
                   onClick={() => setActiveTab('safety')}
@@ -244,13 +244,13 @@ const StaffDashboard: React.FC = () => {
         {/* Safety Controls Tab */}
         {activeTab === 'safety' && (
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Safety Configuration</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Safety Configuration</h2>
             {safetyConfig && (
               <div className="space-y-4">
                 {Object.entries(safetyConfig).map(([key, value]) => (
                   <div key={key} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
-                      <h3 className="font-medium text-gray-900 capitalize">
+                      <h3 className="font-medium text-gray-900 dark:text-white capitalize">
                         {key.replace(/([A-Z])/g, ' $1').trim()}
                       </h3>
                       <p className="text-sm text-gray-600">
@@ -283,7 +283,7 @@ const StaffDashboard: React.FC = () => {
         {/* Approval Queue Tab */}
         {activeTab === 'approvals' && (
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Approval Queue</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Approval Queue</h2>
             {approvalQueue.length === 0 ? (
               <p className="text-gray-500">No interactions pending approval</p>
             ) : (

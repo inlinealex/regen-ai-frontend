@@ -41,39 +41,39 @@ const HomeDashboard: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
             <span className="text-2xl">👤</span>
-            <span className="text-xs text-green-600 dark:text-green-400 font-medium">LIVE</span>
+            <span className="text-xs text-green-600 dark:text-green-300 font-medium">LIVE</span>
           </div>
           <span className="text-lg font-semibold text-gray-900 dark:text-white">Personas</span>
-          <span className="text-3xl font-bold text-blue-600 dark:text-blue-400 block mt-2">{live.personas}</span>
-          <Link to="/persona-training" className="mt-3 text-sm text-blue-600 dark:text-blue-400 hover:underline inline-block">Manage →</Link>
+          <span className="text-3xl font-bold text-blue-600 dark:text-green-400 block mt-2">{live.personas}</span>
+          <Link to="/persona-training" className="mt-3 text-sm text-blue-600 dark:text-green-400 hover:underline inline-block">Manage →</Link>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
             <span className="text-2xl">👥</span>
-            <span className="text-xs text-green-600 dark:text-green-400 font-medium">LIVE</span>
+            <span className="text-xs text-green-600 dark:text-green-300 font-medium">LIVE</span>
           </div>
           <span className="text-lg font-semibold text-gray-900 dark:text-white">Leads</span>
-          <span className="text-3xl font-bold text-blue-600 dark:text-blue-400 block mt-2">{live.leads}</span>
+          <span className="text-3xl font-bold text-blue-600 dark:text-green-400 block mt-2">{live.leads}</span>
           <span className="text-sm text-gray-600 dark:text-gray-400">Qualified: {live.qualified}</span>
-          <Link to="/lead-management" className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline inline-block">View →</Link>
+          <Link to="/lead-management" className="mt-2 text-sm text-blue-600 dark:text-green-400 hover:underline inline-block">View →</Link>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
             <span className="text-2xl">📈</span>
-            <span className="text-xs text-green-600 dark:text-green-400 font-medium">LIVE</span>
+            <span className="text-xs text-green-600 dark:text-green-300 font-medium">LIVE</span>
           </div>
           <span className="text-lg font-semibold text-gray-900 dark:text-white">Campaigns</span>
-          <span className="text-3xl font-bold text-blue-600 dark:text-blue-400 block mt-2">{live.campaigns}</span>
-          <Link to="/campaign-management" className="mt-3 text-sm text-blue-600 dark:text-blue-400 hover:underline inline-block">Manage →</Link>
+          <span className="text-3xl font-bold text-blue-600 dark:text-green-400 block mt-2">{live.campaigns}</span>
+          <Link to="/campaign-management" className="mt-3 text-sm text-blue-600 dark:text-green-400 hover:underline inline-block">Manage →</Link>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
             <span className="text-2xl">🧠</span>
-            <span className="text-xs text-green-600 dark:text-green-400 font-medium">LIVE</span>
+            <span className="text-xs text-green-600 dark:text-green-300 font-medium">LIVE</span>
           </div>
           <span className="text-lg font-semibold text-gray-900 dark:text-white">Vector DB</span>
-          <span className="text-3xl font-bold text-blue-600 dark:text-blue-400 block mt-2">{live.vectorDB}</span>
-          <Link to="/vector-database" className="mt-3 text-sm text-blue-600 dark:text-blue-400 hover:underline inline-block">Status →</Link>
+          <span className="text-3xl font-bold text-blue-600 dark:text-green-400 block mt-2">{live.vectorDB}</span>
+          <Link to="/vector-database" className="mt-3 text-sm text-blue-600 dark:text-green-400 hover:underline inline-block">Status →</Link>
         </div>
       </div>
       {/* Charts Row */}
@@ -81,17 +81,17 @@ const HomeDashboard: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center justify-between mb-4">
             <span className="text-lg font-semibold text-gray-900 dark:text-white">Revenue</span>
-            <span className="text-xs text-green-600 dark:text-green-400 font-medium">LIVE</span>
+            <span className="text-xs text-green-600 dark:text-green-300 font-medium">LIVE</span>
           </div>
-          <span className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-4 block">£{live.revenue.toLocaleString()}</span>
+          <span className="text-3xl font-bold text-blue-600 dark:text-green-400 mb-4 block">£{live.revenue.toLocaleString()}</span>
           <DummyChart />
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center justify-between mb-4">
             <span className="text-lg font-semibold text-gray-900 dark:text-white">Meetings</span>
-            <span className="text-xs text-green-600 dark:text-green-400 font-medium">LIVE</span>
+            <span className="text-xs text-green-600 dark:text-green-300 font-medium">LIVE</span>
           </div>
-          <span className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-4 block">{live.meetings}</span>
+          <span className="text-3xl font-bold text-blue-600 dark:text-green-400 mb-4 block">{live.meetings}</span>
           <DummyChart />
         </div>
       </div>

@@ -196,7 +196,7 @@ const CampaignManagementInterface: React.FC = () => {
       active: 'bg-green-100 text-green-800',
       paused: 'bg-yellow-100 text-yellow-800',
       draft: 'bg-gray-100 text-gray-800',
-      completed: 'bg-blue-100 text-blue-800'
+      completed: 'bg-blue-100 dark:bg-green-100 text-blue-800 dark:text-green-800'
     };
     return colors[status];
   };
@@ -231,7 +231,7 @@ const CampaignManagementInterface: React.FC = () => {
         <div className="mb-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Client Campaign Management</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Client Campaign Management</h1>
               <p className="mt-2 text-gray-600">Manage campaigns for each client with data isolation</p>
             </div>
             <div className="flex space-x-4">
@@ -328,7 +328,7 @@ const CampaignManagementInterface: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-500">Total Campaigns</h3>
-            <p className="text-3xl font-bold text-gray-900">{campaigns.length}</p>
+                            <p className="text-3xl font-bold text-gray-900 dark:text-white">{campaigns.length}</p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-500">Active</h3>
@@ -338,7 +338,7 @@ const CampaignManagementInterface: React.FC = () => {
           </div>
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-500">Total Leads</h3>
-            <p className="text-3xl font-bold text-blue-600">
+                            <p className="text-3xl font-bold text-blue-600 dark:text-green-400">
               {campaigns.reduce((sum, c) => sum + c.performance.metrics.totalLeads, 0)}
             </p>
           </div>

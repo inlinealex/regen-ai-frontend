@@ -70,6 +70,41 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/api/analytics`);
     return response.json();
   },
+
+  // Enhanced Campaign Management endpoints
+  get: async (endpoint: string) => {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`);
+    return response.json();
+  },
+
+  post: async (endpoint: string, data?: any) => {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    });
+    return response.json();
+  },
+
+  put: async (endpoint: string, data?: any) => {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    });
+    return response.json();
+  },
+
+  delete: async (endpoint: string) => {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'DELETE',
+    });
+    return response.json();
+  },
 };
 
 export default api; 
